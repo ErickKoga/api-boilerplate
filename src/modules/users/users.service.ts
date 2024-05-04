@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma.service';
@@ -16,15 +16,30 @@ export class UsersService {
   }
 
   async findMany(userFilterDto?: UserFilterDto): Promise<User[]> {
-    const response = await this.prisma.user.findMany({
-      where: userFilterDto,
-    });
+    const { withDeleted, ...data } = userFilterDto;
+    const response = await this.prisma.user
+      .findMany({
+        where: { ...data, deletedAt: withDeleted ? undefined : null },
+      })
+      .then((data) => {
+        if (!data.length)
+          throw new HttpException('No users were found.', HttpStatus.NOT_FOUND);
+        return data;
+      });
 
     return plainToInstance(User, response);
   }
 
   async findFirst(userFilterDto: UserFilterDto): Promise<User> {
-    const response = await this.prisma.user.findFirst({ where: userFilterDto });
+    const { withDeleted, ...data } = userFilterDto;
+    if (!data || Object.entries(data).length === 0)
+      throw new HttpException(
+        'No arguments were provided.',
+        HttpStatus.BAD_REQUEST,
+      );
+    const response = await this.prisma.user.findFirstOrThrow({
+      where: { ...data, deletedAt: withDeleted ? undefined : null },
+    });
     return plainToInstance(User, response);
   }
 

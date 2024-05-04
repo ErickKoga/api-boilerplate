@@ -24,8 +24,8 @@ export class UsersController {
   }
 
   @Get()
-  async findMany(): Promise<User[]> {
-    return await this.usersService.findMany();
+  findMany(@Query() userFilterDto: UserFilterDto): Promise<User[]> {
+    return this.usersService.findMany(userFilterDto);
   }
 
   @Get('find')
