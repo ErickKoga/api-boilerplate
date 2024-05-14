@@ -11,7 +11,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  login(@Body() loginDto: LoginDto): Promise<string> {
+  login(@Body() loginDto: LoginDto): Promise<{ access_token: string }> {
     return this.authService.login(loginDto);
   }
 

@@ -13,15 +13,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<string> {
+  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
     const { email, password } = loginDto;
     const user: User = await this.usersService.findFirst({ email: email });
 
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
-    }
-    if (user.deletedAt) {
-      throw new HttpException('User account deleted.', HttpStatus.CONFLICT);
     }
     if (!(await bcrypt.compare(password, user.hash))) {
       throw new HttpException('Invalid credentials.', HttpStatus.UNAUTHORIZED);
@@ -31,7 +28,8 @@ export class AuthService {
       sub: user.id,
       email: user.email,
     };
-    return this.jwtService.sign(payload);
+
+    return { access_token: this.jwtService.sign(payload) };
   }
 
   async register(registerDto: RegisterDto): Promise<User> {
