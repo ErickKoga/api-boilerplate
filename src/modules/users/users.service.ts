@@ -16,30 +16,25 @@ export class UsersService {
   }
 
   async findMany(userFilterDto?: UserFilterDto): Promise<User[]> {
-    const { withDeleted, ...data } = userFilterDto;
-    const response = await this.prisma.user
-      .findMany({
-        where: { ...data, deletedAt: withDeleted ? undefined : null },
-      })
-      .then((data) => {
-        if (!data.length)
-          throw new HttpException('No users were found.', HttpStatus.NOT_FOUND);
-        return data;
-      });
+    const { withDeleted, ...data } = userFilterDto ?? {};
+    const response = await this.prisma.user.findMany({
+      where: { ...data, deletedAt: withDeleted ? undefined : null },
+    });
+
+    if (!response.length) {
+      throw new HttpException('No users were found.', HttpStatus.NOT_FOUND);
+    }
 
     return plainToInstance(User, response);
   }
 
   async findFirst(userFilterDto: UserFilterDto): Promise<User> {
     const { withDeleted, ...data } = userFilterDto;
-    if (!data || Object.entries(data).length === 0)
-      throw new HttpException(
-        'No arguments were provided.',
-        HttpStatus.BAD_REQUEST,
-      );
+
     const response = await this.prisma.user.findFirstOrThrow({
       where: { ...data, deletedAt: withDeleted ? undefined : null },
     });
+
     return plainToInstance(User, response);
   }
 
@@ -47,6 +42,7 @@ export class UsersService {
     const response = await this.prisma.user.findUniqueOrThrow({
       where: { id },
     });
+
     return plainToInstance(User, response);
   }
 
@@ -55,6 +51,7 @@ export class UsersService {
       where: { id },
       data: updateUserDto,
     });
+
     return plainToInstance(User, response);
   }
 
@@ -63,5 +60,21 @@ export class UsersService {
       where: { id },
       data: { deletedAt: new Date() },
     });
+  }
+
+  async restore(id: string): Promise<User> {
+    const response = await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    if (!response) {
+      throw new HttpException(
+        'User not found or not soft deleted',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return plainToInstance(User, response);
   }
 }

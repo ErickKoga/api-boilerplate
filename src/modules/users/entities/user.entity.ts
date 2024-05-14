@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { toTitleCase } from 'src/helpers/title-case';
 
 export class User {
   @IsNotEmpty()
@@ -17,6 +18,7 @@ export class User {
   @IsNotEmpty()
   @IsEmail()
   @IsLowercase()
+  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsNotEmpty()
@@ -26,6 +28,7 @@ export class User {
 
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => toTitleCase(value))
   name: string;
 
   @IsNotEmpty()
