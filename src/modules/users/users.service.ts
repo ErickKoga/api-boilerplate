@@ -16,7 +16,7 @@ export class UsersService {
   }
 
   async findMany(userFilterDto?: UserFilterDto): Promise<User[]> {
-    const { withDeleted, ...data } = userFilterDto ?? {};
+    const { withDeleted, ...data } = userFilterDto;
     const response = await this.prisma.user.findMany({
       where: { ...data, deletedAt: withDeleted ? undefined : null },
     });
@@ -47,9 +47,10 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const { roleId, ...data } = updateUserDto;
     const response = await this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: { ...data, role: { connect: { id: roleId } } },
     });
 
     return plainToInstance(User, response);
@@ -64,7 +65,7 @@ export class UsersService {
 
   async restore(id: string): Promise<User> {
     const response = await this.prisma.user.update({
-      where: { id },
+      where: { id, deletedAt: { not: null } },
       data: { deletedAt: null },
     });
 

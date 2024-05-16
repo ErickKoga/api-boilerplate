@@ -6,9 +6,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/global-exception.filter';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), UsersModule, AuthModule],
+  imports: [ConfigModule.forRoot(), UsersModule, AuthModule, RolesModule],
   controllers: [AppController],
   providers: [
     {

@@ -2,9 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { plainToInstance } from 'class-transformer';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,6 @@ export class AuthService {
     const { password, ...data } = registerDto;
     const hash = await bcrypt.hash(password, 10);
     const user = await this.usersService.create({ ...data, hash });
-    return user;
+    return plainToInstance(User, user);
   }
 }

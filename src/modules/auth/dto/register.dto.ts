@@ -4,16 +4,17 @@ import {
   IsLowercase,
   IsNotEmpty,
   IsString,
+  IsUUID,
   Length,
   Matches,
 } from 'class-validator';
 import { toTitleCase } from 'src/helpers/title-case';
 
 export class RegisterDto {
+  @Transform(({ value }) => value.toLowerCase())
   @IsNotEmpty()
   @IsEmail()
   @IsLowercase()
-  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsNotEmpty()
@@ -29,8 +30,12 @@ export class RegisterDto {
   })
   password: string;
 
+  @Transform(({ value }) => toTitleCase(value))
   @IsNotEmpty()
   @IsString()
-  @Transform(({ value }) => toTitleCase(value))
   name: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  roleId: string;
 }

@@ -9,10 +9,10 @@ import {
 } from 'class-validator';
 
 export class LoginDto {
+  @Transform(({ value }) => value.toLowerCase())
   @IsNotEmpty()
   @IsEmail()
   @IsLowercase()
-  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsNotEmpty()

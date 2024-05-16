@@ -1,7 +1,8 @@
-import { Exclude, Transform } from 'class-transformer';
+import { Exclude, Transform, Type } from 'class-transformer';
 import {
   IsDate,
   IsEmail,
+  IsInstance,
   IsLowercase,
   IsNotEmpty,
   IsOptional,
@@ -9,16 +10,17 @@ import {
   IsUUID,
 } from 'class-validator';
 import { toTitleCase } from 'src/helpers/title-case';
+import { Role } from 'src/modules/roles/entities/role.entity';
 
 export class User {
   @IsNotEmpty()
   @IsUUID()
   id: string;
 
+  @Transform(({ value }) => value.toLowerCase())
   @IsNotEmpty()
   @IsEmail()
   @IsLowercase()
-  @Transform(({ value }) => value.toLowerCase())
   email: string;
 
   @IsNotEmpty()
@@ -26,10 +28,14 @@ export class User {
   @Exclude({ toPlainOnly: true })
   hash: string;
 
+  @Transform(({ value }) => toTitleCase(value))
   @IsNotEmpty()
   @IsString()
-  @Transform(({ value }) => toTitleCase(value))
   name: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  roleId: string;
 
   @IsNotEmpty()
   @IsDate()
@@ -42,6 +48,10 @@ export class User {
   @IsOptional()
   @IsDate()
   deletedAt: Date;
+
+  @IsInstance(Role)
+  @Type(() => Role)
+  role: Role;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
