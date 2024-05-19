@@ -33,6 +33,7 @@ export class User {
   @IsString()
   name: string;
 
+  @Exclude({ toPlainOnly: true })
   @IsNotEmpty()
   @IsUUID()
   roleId: string;
